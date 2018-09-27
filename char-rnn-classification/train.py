@@ -5,6 +5,8 @@ import random
 import time
 import math
 
+import config
+
 n_hidden = 128
 n_epochs = 100000
 print_every = 5000
@@ -22,8 +24,8 @@ def randomChoice(l):
 def randomTrainingPair():
     category = randomChoice(all_categories)
     line = randomChoice(category_lines[category])
-    category_tensor = Variable(torch.LongTensor([all_categories.index(category)]))
-    line_tensor = Variable(lineToTensor(line))
+    category_tensor = Variable(torch.LongTensor([all_categories.index(category)])).to(config.HOST_DEVICE)
+    line_tensor = Variable(lineToTensor(line)).to(config.HOST_DEVICE)
     return category, line, category_tensor, line_tensor
 
 rnn = RNN(n_letters, n_hidden, n_categories)
@@ -42,7 +44,7 @@ def train(category_tensor, line_tensor):
 
     optimizer.step()
 
-    return output, loss.data[0]
+    return output, loss.item()
 
 # Keep track of losses for plotting
 current_loss = 0
