@@ -27,8 +27,8 @@ def random_training_set(chunk_len):
     start_index = random.randint(0, file_len - chunk_len)
     end_index = start_index + chunk_len + 1
     chunk = file[start_index:end_index]
-    inp = char_tensor(chunk[:-1])
-    target = char_tensor(chunk[1:])
+    inp = char_tensor(chunk[:-1]).to(config.HOST_DEVICE)
+    target = char_tensor(chunk[1:]).to(config.HOST_DEVICE)
     return inp, target
 
 decoder = RNN(n_characters, args.hidden_size, n_characters, args.n_layers)
@@ -46,12 +46,12 @@ def train(inp, target):
 
     for c in range(args.chunk_len):
         output, hidden = decoder(inp[c], hidden)
-        loss += criterion(output, target[c])
+        loss += criterion(output, target[c].view(1).to(config.HOST_DEVICE))
 
     loss.backward()
     decoder_optimizer.step()
 
-    return loss.data[0] / args.chunk_len
+    return loss.item() / args.chunk_len
 
 def save():
     save_filename = os.path.splitext(os.path.basename(args.filename))[0] + '.pt'

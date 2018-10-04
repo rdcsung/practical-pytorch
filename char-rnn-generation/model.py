@@ -4,6 +4,8 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
+import config
+
 class RNN(nn.Module):
     def __init__(self, input_size, hidden_size, output_size, n_layers=1):
         super(RNN, self).__init__()
@@ -16,12 +18,15 @@ class RNN(nn.Module):
         self.gru = nn.GRU(hidden_size, hidden_size, n_layers)
         self.decoder = nn.Linear(hidden_size, output_size)
 
+        self.to(config.HOST_DEVICE)
+
     def forward(self, input, hidden):
+        input = input.to(config.HOST_DEVICE)
         input = self.encoder(input.view(1, -1))
         output, hidden = self.gru(input.view(1, 1, -1), hidden)
         output = self.decoder(output.view(1, -1))
         return output, hidden
 
     def init_hidden(self):
-        return Variable(torch.zeros(self.n_layers, 1, self.hidden_size))
+        return Variable(torch.zeros(self.n_layers, 1, self.hidden_size)).to(config.HOST_DEVICE)
 
