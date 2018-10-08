@@ -14,6 +14,8 @@ import torch.nn as nn
 from data import *
 from model import *
 
+import config
+
 # Training the Network
 
 def train(category_tensor, input_line_tensor, target_line_tensor):
@@ -23,12 +25,12 @@ def train(category_tensor, input_line_tensor, target_line_tensor):
     
     for i in range(input_line_tensor.size()[0]):
         output, hidden = rnn(category_tensor, input_line_tensor[i], hidden)
-        loss += criterion(output, target_line_tensor[i])
+        loss += criterion(output, target_line_tensor[i].view(1).to(config.HOST_DEVICE))
 
     loss.backward()
     optimizer.step()
     
-    return output, loss.data[0] / input_line_tensor.size()[0]
+    return output, loss.item() / input_line_tensor.size()[0]
 
 def time_since(t):
     now = time.time()
@@ -66,6 +68,7 @@ try:
         if epoch % plot_every == 0:
             all_losses.append(loss_avg / plot_every)
             loss_avg = 0
+    save()
 
 except KeyboardInterrupt:
     print("Saving before quit...")

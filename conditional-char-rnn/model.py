@@ -2,6 +2,8 @@ import torch
 import torch.nn as nn
 from torch.autograd import Variable
 
+import config
+
 # Creating the Network
 
 class RNN(nn.Module):
@@ -16,8 +18,13 @@ class RNN(nn.Module):
         self.i2o = nn.Linear(category_size + input_size + hidden_size, output_size)
         self.o2o = nn.Linear(hidden_size + output_size, output_size)
         self.softmax = nn.LogSoftmax()
+
+        self.to(config.HOST_DEVICE)
     
     def forward(self, category, input, hidden):
+        category = category.to(config.HOST_DEVICE)
+        input = input.to(config.HOST_DEVICE)
+        hidden = hidden.to(config.HOST_DEVICE)
         input_combined = torch.cat((category, input, hidden), 1)
         hidden = self.i2h(input_combined)
         output = self.i2o(input_combined)
@@ -26,6 +33,6 @@ class RNN(nn.Module):
         return output, hidden
 
     def init_hidden(self):
-        return Variable(torch.zeros(1, self.hidden_size))
+        return Variable(torch.zeros(1, self.hidden_size)).to(config.HOST_DEVICE)
 
 
